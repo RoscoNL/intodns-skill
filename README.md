@@ -1,41 +1,34 @@
-# IntoDNS - DNS & Email Security Analysis for your Terminal
+# IntoDNS - DNS & Email Security Analysis
 
-**Stop switching to your browser.** Run a full DNS health check and email security audit from your terminal in seconds. Get a score, spot misconfigurations, and get copy-paste fixes - right where you work.
+**Comprehensive domain security scanning from your terminal.** Run 50+ DNS and email security checks in under 3 seconds. Get a score, spot misconfigurations, and get copy-paste fixes - right where you work.
 
 ```
 /intodns myproject.com
 ```
 
+[![npm](https://img.shields.io/npm/v/intodns)](https://www.npmjs.com/package/intodns)
+
 ## Install
 
 ```bash
-clawdhub install intodns
+clawhub install intodns
 ```
-
-## Why developers use this
-
-You just deployed a new project. Email isn't arriving. Is it SPF? DKIM? Did someone forget DMARC? Maybe DNSSEC broke after a migration?
-
-IntoDNS gives you the answer in one command:
-
-- **0-100 health score** so you know where you stand instantly
-- **Pass/fail per category** - DNS, DNSSEC, SPF, DKIM, DMARC, MTA-STS, BIMI, blacklists
-- **Concrete fixes** - not just "something is wrong" but exactly what to add or change
-- **No signup, no API key** - just works
 
 ## What it checks
 
-| Check | What you learn |
-|-------|---------------|
-| DNS Records | Are your A, AAAA, MX, NS, CAA records correct? |
-| DNSSEC | Is your domain cryptographically signed? |
-| SPF | Can spammers send email as you? |
-| DKIM | Are your emails authenticated? |
-| DMARC | What happens to failed authentication? |
-| MTA-STS | Is email transport encrypted? |
-| BIMI | Does your brand logo show in inboxes? |
-| Blacklists | Are your mail server IPs flagged? |
-| Propagation | Are your DNS changes live worldwide? |
+| Category | Checks | Weight |
+|----------|--------|--------|
+| DNS Records | A, AAAA, MX, NS, SOA, CAA, CNAME | 20% |
+| DNSSEC | Chain validation, DS records, algorithm checks | 15% |
+| Email - SPF | Record parsing, DNS lookup counting (RFC 7208) | 30% |
+| Email - DKIM | Selector discovery across 20+ common selectors | |
+| Email - DMARC | Policy analysis, alignment checks | |
+| Email - MTA-STS | Policy file validation, transport encryption | |
+| Email - BIMI | Brand logo validation (SVG Tiny 1.2 PS) | |
+| IPv6 | AAAA records, dual-stack readiness | 15% |
+| Security | IP blacklist checks (6+ lists), best practices | 20% |
+
+Grades: A+ (100%), A (90-99%), B (80-89%), C (70-79%), D (50-69%), F (0-49%)
 
 ## Example prompts
 
@@ -59,33 +52,65 @@ Full DNS security audit of mydomain.com
 Why isn't email arriving for newproject.io?
 ```
 
+```
+Is my domain blacklisted?
+```
+
+```
+Generate a PDF report for example.com
+```
+
 ## Example output
 
 ```
-DNS Health Report: example.com
+DNS Health Report: cobytes.com
 
-Score: 72/100
+Grade: A+ | Score: 100/100
 
-| Category        | Status | Score |
-|-----------------|--------|-------|
-| DNS Records     | PASS   | 25/25 |
-| DNSSEC          | FAIL   | 0/20  |
-| Email (SPF)     | PASS   | 15/15 |
-| Email (DKIM)    | WARN   | 10/15 |
-| Email (DMARC)   | PASS   | 15/15 |
-| Email (MTA-STS) | FAIL   | 0/10  |
+| Category          | Status | Score |
+|-------------------|--------|-------|
+| DNS Records       | PASS   | 100%  |
+| DNSSEC            | PASS   | 100%  |
+| Email Security    | PASS   | 100%  |
+| IPv6              | PASS   | 100%  |
+| Security          | PASS   | 100%  |
 
-Issues:
-- CRITICAL: DNSSEC not enabled
-- WARNING: DKIM - only default selector found
-- INFO: MTA-STS not configured
+No issues found.
 
-Full report: https://intodns.ai/scan/example.com
+Full report: https://intodns.ai/scan/cobytes.com
 ```
 
-## Add a badge to your README
+## Also available as
 
-Show your domain's DNS health score:
+### npm CLI
+
+```bash
+npx intodns example.com
+npx intodns example.com --json
+npx intodns example.com --fail-below 80
+```
+
+### GitHub Action
+
+```yaml
+- name: DNS Security Check
+  uses: RoscoNL/dns-security-scanner/github-action@main
+  with:
+    domain: example.com
+    fail-below: 70
+```
+
+### PDF Reports
+
+Download a full PDF security report:
+
+```
+https://intodns.ai/api/pdf/yourdomain.com
+```
+
+### Score Badge
+
+Add a DNS health badge to your README:
 
 ```markdown
 [![DNS Score](https://intodns.ai/api/badge/yourdomain.com)](https://intodns.ai/scan/yourdomain.com)
@@ -93,13 +118,15 @@ Show your domain's DNS health score:
 
 ## API
 
-Public API. No key required. No rate limit for normal usage.
+Public API. No key required. No signup.
 
 | Endpoint | Description |
 |----------|-------------|
-| `/api/scan/quick?domain=X` | Full scan with score |
+| `/api/scan/quick?domain=X` | Full scan with score, grade, categories |
 | `/api/dns/lookup?domain=X` | All DNS records |
+| `/api/dns/lookup?domain=X&type=MX` | DNS records by type |
 | `/api/dns/dnssec?domain=X` | DNSSEC validation |
+| `/api/dns/propagation?domain=X` | Worldwide DNS propagation |
 | `/api/email/check?domain=X` | Full email security |
 | `/api/email/spf?domain=X` | SPF check |
 | `/api/email/dkim?domain=X` | DKIM discovery |
@@ -108,10 +135,9 @@ Public API. No key required. No rate limit for normal usage.
 | `/api/email/bimi?domain=X` | BIMI check |
 | `/api/email/blacklist?domain=X` | IP blacklist check |
 | `/api/badge/DOMAIN` | SVG score badge |
+| `/api/pdf/DOMAIN` | PDF security report |
 
 Base URL: `https://intodns.ai`
-
-Full API docs: [intodns.ai/developers](https://intodns.ai/developers)
 
 ---
 
