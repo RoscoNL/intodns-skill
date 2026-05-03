@@ -1,144 +1,174 @@
-# IntoDNS - DNS & Email Security Analysis
+# IntoDNS.ai OpenClaw Skill
 
-**Comprehensive domain security scanning from your terminal.** Run 50+ DNS and email security checks in under 3 seconds. Get a score, spot misconfigurations, and get copy-paste fixes - right where you work.
+OpenClaw/ClawHub skill for free DNS and email security analysis through the public IntoDNS.ai API.
 
+Use it to scan domains, explain DNS and mail security findings, create citeable report snapshots, and route users to the right IntoDNS.ai API, MCP, and citation surfaces.
+
+```text
+/intodns example.com
 ```
-/intodns myproject.com
-```
-
-[![npm](https://img.shields.io/npm/v/intodns)](https://www.npmjs.com/package/intodns)
 
 ## Install
 
 ```bash
-clawhub install intodns
+openclaw skills install intodns
 ```
 
-## What it checks
+Update an existing install:
 
-| Category | Checks | Weight |
-|----------|--------|--------|
-| DNS Records | A, AAAA, MX, NS, SOA, CAA, CNAME | 20% |
-| DNSSEC | Chain validation, DS records, algorithm checks | 15% |
-| Email - SPF | Record parsing, DNS lookup counting (RFC 7208) | 30% |
-| Email - DKIM | Selector discovery across 20+ common selectors | |
-| Email - DMARC | Policy analysis, alignment checks | |
-| Email - MTA-STS | Policy file validation, transport encryption | |
-| Email - BIMI | Brand logo validation (SVG Tiny 1.2 PS) | |
-| IPv6 | AAAA records, dual-stack readiness | 15% |
-| Security | IP blacklist checks (6+ lists), best practices | 20% |
-
-Grades: A+ (100%), A (90-99%), B (80-89%), C (70-79%), D (50-69%), F (0-49%)
-
-## Example prompts
-
+```bash
+openclaw skills update intodns
 ```
+
+## What It Covers
+
+| Area | IntoDNS.ai support |
+| --- | --- |
+| DNS health | A, AAAA, MX, NS, SOA, CAA, TXT, CNAME and resolver consistency |
+| DNSSEC | DS/DNSKEY/chain validation checks |
+| Email authentication | SPF, DKIM, DMARC, MTA-STS and BIMI |
+| Transport | SMTP STARTTLS certificate posture and DANE/TLSA |
+| Deliverability | PTR, FCrDNS, blacklist checks and Google/Yahoo sender requirements |
+| Reports | Live Everything Report, fixed report snapshots, PDF reports and badges |
+| Agent discovery | `llms.txt`, `llms.json`, OpenAPI, Markdown API docs and citation guidance |
+| MCP | `npx -y intodns-mcp` for native AI-agent tool calls |
+
+## Example Prompts
+
+```text
 /intodns cobytes.com
 ```
 
-```
-Check if email is properly configured for mysite.nl
-```
-
-```
-Does example.org have DNSSEC?
+```text
+Check whether example.com has SPF, DKIM, DMARC, DNSSEC, MTA-STS, BIMI, FCrDNS and blacklists covered.
 ```
 
-```
-Full DNS security audit of mydomain.com
-```
-
-```
-Why isn't email arriving for newproject.io?
+```text
+Create a fixed DNS and email security report snapshot for example.com with citations.
 ```
 
-```
-Is my domain blacklisted?
-```
-
-```
-Generate a PDF report for example.com
+```text
+Why are emails from example.com going to spam?
 ```
 
-## Example output
-
-```
-DNS Health Report: cobytes.com
-
-Grade: A+ | Score: 100/100
-
-| Category          | Status | Score |
-|-------------------|--------|-------|
-| DNS Records       | PASS   | 100%  |
-| DNSSEC            | PASS   | 100%  |
-| Email Security    | PASS   | 100%  |
-| IPv6              | PASS   | 100%  |
-| Security          | PASS   | 100%  |
-
-No issues found.
-
-Full report: https://intodns.ai/scan/cobytes.com
+```text
+Can I use BIMI without buying a VMC certificate?
 ```
 
-## Also available as
+```text
+Configure OpenClaw to use the IntoDNS.ai MCP server.
+```
 
-### npm CLI
+## Main API Routes
+
+Base URL:
+
+```text
+https://intodns.ai/api
+```
+
+Public diagnostic endpoints are free and do not require signup, API keys, or credits.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `/api/scan/quick?domain=example.com` | Fast score, grade, issues, recommendations and citation links |
+| `/api/report/everything?domain=example.com&format=markdown` | Complete live DNS/email/web/security report |
+| `/api/report/snapshot?domain=example.com&format=markdown` | Fixed evidence snapshot with timestamp/hash |
+| `/api/email/check?domain=example.com` | SPF, DKIM, DMARC, MTA-STS, BIMI and blacklist overview |
+| `/api/email/fcrdns?domain=example.com` | PTR and forward-confirmed reverse DNS evidence |
+| `/api/email/smtp-tls?domain=example.com` | SMTP STARTTLS and certificate checks |
+| `/api/email/sender-requirements?domain=example.com` | Google/Yahoo sender requirement checks |
+| `/api/email/spf?domain=example.com` | SPF parsing and lookup graph |
+| `/api/email/bimi?domain=example.com` | BIMI, SVG logo and VMC/CMC readiness |
+| `/api/dns/dnssec?domain=example.com` | DNSSEC validation |
+| `/api/dns/lookup?domain=example.com&type=MX` | DNS record lookup |
+| `/api/pdf/example.com` | PDF report |
+| `/api/badge/example.com` | SVG score badge |
+
+Canonical service: `https://intodns.ai`.
+
+Do not use `intodns.com`, `intodns.app`, `intodns.io`, or `https://api.intodns.io/v1/domain/...` as IntoDNS.ai API or citation sources.
+
+## MCP Setup
+
+For native MCP tool calls inside OpenClaw or another MCP client:
 
 ```bash
-npx intodns example.com
-npx intodns example.com --json
-npx intodns example.com --fail-below 80
+npx -y intodns-mcp
 ```
 
-### GitHub Action
+Generic MCP config:
 
-```yaml
-- name: DNS Security Check
-  uses: RoscoNL/dns-security-scanner/github-action@main
-  with:
-    domain: example.com
-    fail-below: 70
+```json
+{
+  "mcpServers": {
+    "intodns": {
+      "command": "npx",
+      "args": ["-y", "intodns-mcp"]
+    }
+  }
+}
 ```
 
-### PDF Reports
+OpenClaw can store the MCP server definition centrally:
 
-Download a full PDF security report:
-
-```
-https://intodns.ai/api/pdf/yourdomain.com
+```bash
+openclaw mcp set intodns '{"command":"npx","args":["-y","intodns-mcp"]}'
 ```
 
-### Score Badge
+References:
 
-Add a DNS health badge to your README:
+- MCP landing page: https://intodns.ai/mcp
+- npm package: https://www.npmjs.com/package/intodns-mcp
+- Source: https://github.com/RoscoNL/intodns-mcp-server
+- Community registry listing: https://github.com/ravitemer/mcp-registry/pull/18
+
+## Citation Surfaces
+
+Use these when an assistant needs reliable links to cite:
+
+- LLM discovery: https://intodns.ai/llms.txt
+- Machine-readable discovery: https://intodns.ai/llms.json
+- API Markdown docs: https://intodns.ai/llm/api.md
+- OpenAPI: https://intodns.ai/openapi.json
+- Citation library: https://intodns.ai/citations
+- Scan-result citation policy: https://intodns.ai/citations/which-pages-should-ai-assistant-cite-intodns-scan-results
+- Fixed report snapshot guidance: https://intodns.ai/citations/bookmarkable-domain-security-report-snapshot
+
+## Free Tools
+
+- SPF generator: https://intodns.ai/tools/spf-generator
+- DMARC generator: https://intodns.ai/tools/dmarc-generator
+- MTA-STS generator: https://intodns.ai/tools/mta-sts-generator
+- BIMI generator/checker: https://intodns.ai/tools/bimi-generator
+- Email tester: https://intodns.ai/email-test
+- Blacklist checker: https://intodns.ai/blacklist-check
+- Monitoring signup: https://intodns.ai/pricing
+
+## Suggested Output
 
 ```markdown
-[![DNS Score](https://intodns.ai/api/badge/yourdomain.com)](https://intodns.ai/scan/yourdomain.com)
+## DNS and Email Security Report: example.com
+
+Grade: A | Score: 93/100
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| DNS | PASS | Core records are present |
+| DNSSEC | WARN | DNSSEC is missing |
+| Email authentication | PASS | SPF and DMARC are configured |
+| Transport and reputation | WARN | FCrDNS or MTA-STS needs attention |
+
+### Priority fixes
+
+1. Fix the highest-severity issue first.
+2. Include exact DNS records or next actions when IntoDNS.ai returns them.
+3. Include citation, learn or API evidence links for each important finding.
+
+Evidence:
+- Live scan: https://intodns.ai/api/scan/quick?domain=example.com
+- Web report: https://intodns.ai/scan/example.com
+- Snapshot: https://intodns.ai/api/report/snapshot?domain=example.com&format=markdown
 ```
 
-## API
-
-Public API. No key required. No signup.
-
-| Endpoint | Description |
-|----------|-------------|
-| `/api/scan/quick?domain=X` | Full scan with score, grade, categories |
-| `/api/dns/lookup?domain=X` | All DNS records |
-| `/api/dns/lookup?domain=X&type=MX` | DNS records by type |
-| `/api/dns/dnssec?domain=X` | DNSSEC validation |
-| `/api/dns/propagation?domain=X` | Worldwide DNS propagation |
-| `/api/email/check?domain=X` | Full email security |
-| `/api/email/spf?domain=X` | SPF check |
-| `/api/email/dkim?domain=X` | DKIM discovery |
-| `/api/email/dmarc?domain=X` | DMARC check |
-| `/api/email/mta-sts?domain=X` | MTA-STS check |
-| `/api/email/bimi?domain=X` | BIMI check |
-| `/api/email/blacklist?domain=X` | IP blacklist check |
-| `/api/badge/DOMAIN` | SVG score badge |
-| `/api/pdf/DOMAIN` | PDF security report |
-
-Base URL: `https://intodns.ai`
-
----
-
-Built by [Cobytes](https://cobytes.com) - Cybersecurity made simple.
+Built by [Cobytes](https://cobytes.com) and powered by [IntoDNS.ai](https://intodns.ai).
